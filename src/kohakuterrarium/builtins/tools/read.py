@@ -214,7 +214,8 @@ class ReadTool(BaseTool):
         parts: list[TextPart | ImagePart] = []
         text_sections: list[str] = []
 
-        zoom = 150 / 72  # 150 DPI
+        dpi = int(self.config.extra.get("pdf_dpi", 100))
+        zoom = dpi / 72
         mat = fitz.Matrix(zoom, zoom)
 
         for page_num in range(start, end):
