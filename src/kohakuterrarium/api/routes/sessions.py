@@ -23,18 +23,30 @@ async def list_sessions(limit: int = 20):
     if not _SESSION_DIR.exists():
         return []
 
-    sessions = sorted(
-        list(_SESSION_DIR.glob("*.kohakutr")) + list(_SESSION_DIR.glob("*.kt")),
-        key=lambda p: p.stat().st_mtime,
-        reverse=True,
-    )[:limit]
+    session_files = list(_SESSION_DIR.glob("*.kohakutr")) + list(
+        _SESSION_DIR.glob("*.kt")
+    )
 
     results = []
-    for path in sessions:
+    for path in session_files:
         try:
             store = SessionStore(path)
             meta = store.load_meta()
             store.close()
+
+            # Read first user message for preview
+            preview = ""
+            try:
+                agent_name = (meta.get("agents") or [""])[0]
+                if agent_name:
+                    events = store.get_events(agent_name)
+                    for evt in events:
+                        if evt.get("type") == "user_input":
+                            preview = (evt.get("content") or "")[:200]
+                            break
+            except Exception:
+                pass
+
             results.append(
                 {
                     "name": path.stem,
@@ -46,11 +58,20 @@ async def list_sessions(limit: int = 20):
                     "status": meta.get("status", ""),
                     "created_at": meta.get("created_at", ""),
                     "last_active": meta.get("last_active", ""),
+                    "preview": preview,
+                    "pwd": meta.get("pwd", ""),
                 }
             )
         except Exception:
             results.append({"name": path.stem, "filename": path.name, "error": True})
-    return results
+
+    # Sort by last_active (from metadata), fallback to created_at, then filename
+    def _sort_key(s):
+        ts = s.get("last_active") or s.get("created_at") or ""
+        return ts
+
+    results.sort(key=_sort_key, reverse=True)
+    return results[:limit]
 
 
 @router.delete("/{session_name}")

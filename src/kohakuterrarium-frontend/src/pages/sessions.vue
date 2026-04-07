@@ -78,6 +78,16 @@
               <span v-if="session.agents && session.agents.length > 0">
                 {{ session.agents.length }} agent{{ session.agents.length !== 1 ? "s" : "" }}
               </span>
+              <span v-if="session.pwd" class="font-mono truncate text-warm-400" :title="session.pwd">
+                {{ session.pwd }}
+              </span>
+            </div>
+            <div
+              v-if="session.preview"
+              class="text-xs text-warm-400 dark:text-warm-500 mt-1 truncate italic"
+              :title="session.preview"
+            >
+              "{{ session.preview }}"
             </div>
           </div>
 
