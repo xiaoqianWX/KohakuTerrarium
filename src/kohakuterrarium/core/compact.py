@@ -175,8 +175,19 @@ class CompactManager:
             summary = await self._summarize(summary_input)
 
             if not summary:
-                logger.warning("Compact summarization returned empty, using truncation")
-                summary = self._emergency_truncate(compact_messages)
+                logger.warning(
+                    "Compact summarization failed — aborting to preserve context"
+                )
+                if self._output_router:
+                    self._output_router.notify_activity(
+                        "processing_error",
+                        "[CompactError] Summarization failed — context preserved unchanged",
+                        metadata={
+                            "error_type": "CompactError",
+                            "error": "Summarization LLM call failed. Context was NOT modified.",
+                        },
+                    )
+                return
 
             # Atomic splice: replace compact zone with summary
             self._splice_conversation(conversation, boundary, summary)

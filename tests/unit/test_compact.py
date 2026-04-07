@@ -254,13 +254,9 @@ class TestRunCompact:
 
         await mgr._run_compact()
 
-        # Should have used emergency truncation
+        # On LLM failure, context should be preserved unchanged (no truncation)
         after_count = len(conv.get_messages())
-        assert after_count < before_count
-        # Summary should mention truncation
-        messages = conv.get_messages()
-        summary = messages[1].content
-        assert "truncated" in summary.lower() or "compacted" in summary.lower()
+        assert after_count == before_count
 
     @pytest.mark.asyncio
     async def test_compact_preserves_live_zone(self):
@@ -404,15 +400,12 @@ class TestEdgeCases:
     async def test_no_llm(self):
         mgr, conv = _make_manager(keep_recent=2)
         mgr._llm = None
+        before_count = len(conv.get_messages())
 
         await mgr._run_compact()
-        # Should use emergency truncation
-        messages = conv.get_messages()
-        assert any(
-            "truncated" in str(m.content).lower()
-            or "compacted" in str(m.content).lower()
-            for m in messages
-        )
+        # On LLM failure/missing, context should be preserved unchanged
+        after_count = len(conv.get_messages())
+        assert after_count == before_count
 
     def test_is_compacting_property(self):
         mgr = CompactManager()
