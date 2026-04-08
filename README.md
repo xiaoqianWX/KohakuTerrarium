@@ -12,26 +12,30 @@
 
 ---
 
-## The Problem
+## Where KohakuTerrarium Fits
 
-The AI ecosystem has plenty of tools, but they all operate at the wrong level of abstraction for building agents:
+AI tools exist at different **application layers** and serve different **roles**. This 2D view reveals a gap:
 
-| Layer | Examples | What they are | The gap |
-|-------|----------|---------------|---------|
-| **LLM App** | LangChain, LangGraph, Dify | Frameworks for orchestrating LLM calls, chains, and pipelines | You build agents FROM these, but they don't define what an agent IS |
-| **Agent Product** | Claude Code, Codex, OpenCode | Complete, polished agent applications | Real agents — but closed. You can't decompose, reconfigure, or compose them |
-| **Simple Agent Lib** | smolagents | Lightweight agent loop with tools | Agent-level, but too thin — one loop, one tool list, no real module system |
-| **Multi-Agent Wrapper** | CrewAI, AutoGen | Frameworks for connecting multiple "agents" | Their "agent" is a thin wrapper around an LLM call with a role string — not a real runtime unit |
+|  | Product | Framework | Utility / Wrapper |
+|--|---------|-----------|-------------------|
+| **LLM App** | ChatGPT, Claude.ai | LangChain, LangGraph, Dify | DSPy |
+| **Agent** | Claude Code, Codex, OpenCode | smolagents (thin), **KohakuTerrarium** | — |
+| **Multi-Agent** | — | **KohakuTerrarium** | CrewAI, AutoGen |
 
-What's missing: **a framework that defines the agent itself as a first-class, reusable, composable runtime abstraction** — comprehensive enough to model Claude Code, a Discord chatbot, a monitoring daemon, and a Neuro-sama-style streamer as different configurations of the same underlying system.
+- **LLM app frameworks** (LangChain, Dify) orchestrate LLM calls and chains. You build agents FROM them, but they don't define what an agent IS.
+- **Agent products** (Claude Code, Codex) are real, sophisticated agents — but closed. You can't decompose, reconfigure, or compose them.
+- **smolagents** is genuinely agent-level, but too thin — one loop, one tool list, no module system, no composition.
+- **CrewAI / AutoGen** call themselves agent frameworks, but their "agent" is a thin LLM wrapper with a role string. They operate at the multi-agent layer without properly defining the agent underneath.
+
+The gap: **a comprehensive framework at the agent level** — one that defines what an agent actually is as a first-class abstraction, with enough depth to model real agent products, not just toy demos.
 
 ## What KohakuTerrarium Is
 
-KohakuTerrarium is a **universal agent-level abstraction framework**. It defines what an agent is as a runtime unit (a **creature**), provides five composable module types to build any kind of agent, and includes a wiring layer (a **terrarium**) for horizontal multi-agent composition.
+KohakuTerrarium is a **universal agent-level abstraction framework**. It defines what an agent is (a **creature**), provides five composable module types to build any kind of agent, and includes a wiring layer (a **terrarium**) for horizontal multi-agent composition.
 
-The key claim: **the creature abstraction is comprehensive enough to model virtually any existing agent product**.
+The core claim: **the creature abstraction is comprehensive enough to model virtually any existing agent product**.
 
-A creature is a complete agent runtime with:
+A creature is a complete agent abstraction composed of:
 
 - **Controller** — the LLM reasoning loop (any model, any provider, any tool-call format)
 - **Input** — how events enter the agent (CLI, TUI, voice/ASR, webhooks, Discord, API — swappable)
@@ -73,12 +77,12 @@ Same framework. Different configs. Each is a standalone creature that also works
 
 These two levels stay separate by design. A creature never knows it's in a terrarium. A terrarium never inspects creature internals.
 
-- **First-class agent abstraction**: a creature is a full runtime unit with its own controller, memory, tools, and I/O — not a workflow node, not a chat participant, not a thin LLM wrapper
+- **First-class agent abstraction**: a creature is a complete agent — controller, memory, tools, I/O, triggers, sub-agents — not a workflow node, not a chat participant, not a thin LLM wrapper
 - **Universal**: the same five module types model coding agents, chatbots, monitoring daemons, and real-time streaming agents
 - **Comprehensively customizable**: every module is swappable, plugins intercept the flows between modules, and the whole thing is config-driven
 - **Reusable**: build an agent once, run it solo or in teams — same config, same behavior
-- **Persistent by default**: sessions save rich runtime state (conversations, tool metadata, sub-agent state, triggers), not just chat history
-- **One runtime, many surfaces**: CLI, TUI, HTTP API, web dashboard, and native desktop app sit on the same underlying system
+- **Persistent by default**: sessions save full agent state (conversations, tool metadata, sub-agent state, triggers), not just chat history
+- **Many surfaces, one abstraction**: CLI, TUI, HTTP API, web dashboard, and native desktop app all drive the same underlying agent
 - **Shareable**: package and install creature / terrarium configs from Git or local sources
 
 ## Key Capabilities
