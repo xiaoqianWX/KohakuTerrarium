@@ -100,11 +100,11 @@ function disconnect() {
   connected.value = false;
 }
 
-onMounted(() => {
+onMounted(async () => {
   term = new Terminal({
     cursorBlink: true,
     fontSize: 13,
-    fontFamily: "Consolas NF, CaskaydiaCove NF, CaskaydiaCove Nerd Font, JetBrainsMono NF, FiraCode NF, Hack NF, JetBrains Mono, Fira Code, Consolas, monospace",
+    fontFamily: "'Consolas NF', 'CaskaydiaCove NF', 'CaskaydiaCove Nerd Font', 'JetBrainsMono NF', 'FiraCode NF', 'Hack NF', 'JetBrains Mono', 'Fira Code', Consolas, monospace",
     theme: {
       background: "#1a1a2e",
       foreground: "#e0e0e0",
@@ -118,6 +118,10 @@ onMounted(() => {
   term.loadAddon(new WebLinksAddon());
 
   if (termEl.value) {
+    // Wait for fonts to load so xterm.js measures glyphs correctly.
+    if (document.fonts?.ready) {
+      await document.fonts.ready;
+    }
     term.open(termEl.value);
     fitAddon.fit();
   }
