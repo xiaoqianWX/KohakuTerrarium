@@ -15,6 +15,7 @@
     <button
       class="px-2 py-0.5 rounded bg-amber/20 hover:bg-amber/30 text-amber-shadow transition-colors"
       :disabled="!canSave"
+      :title="canSave ? 'Save changes' : 'Builtin presets cannot be overwritten — use Save as new'"
       @click="onSave"
     >
       Save

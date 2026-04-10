@@ -270,7 +270,7 @@ async def search_session_memory(
         raise HTTPException(404, f"Session not found: {session_name}")
 
     try:
-        memory = SessionMemory(path)
+        memory = SessionMemory(str(path))
         results = memory.search(query=q, mode=mode, k=k, agent=agent)
     except Exception as e:
         raise HTTPException(500, f"Memory search failed: {e}")

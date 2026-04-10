@@ -121,13 +121,13 @@
               {{ memError }}
             </div>
             <div
-              v-else-if="memResults.length === 0 && memQuery"
+              v-else-if="memSearched && memResults.length === 0"
               class="text-warm-400 text-center py-4 text-[11px]"
             >
-              No results
+              No results for "{{ memQuery }}"
             </div>
-            <div v-else-if="!memQuery" class="text-warm-400 text-center py-4 text-[11px]">
-              Type to search
+            <div v-else-if="!memSearched" class="text-warm-400 text-center py-4 text-[11px]">
+              Type a query and press Enter to search
             </div>
             <div v-else class="flex flex-col gap-1.5">
               <div
@@ -347,6 +347,7 @@ const memMode = ref("auto");
 const memResults = ref([]);
 const memLoading = ref(false);
 const memError = ref("");
+const memSearched = ref(false);
 
 async function runMemorySearch() {
   const q = memQuery.value.trim();
@@ -362,6 +363,7 @@ async function runMemorySearch() {
   }
   memLoading.value = true;
   memError.value = "";
+  memSearched.value = true;
   try {
     const data = await sessionAPI.searchMemory(name, {
       q,
