@@ -270,7 +270,22 @@ async def search_session_memory(
         raise HTTPException(404, f"Session not found: {session_name}")
 
     try:
+        # Open the session store to get events for indexing.
+        store = SessionStore(path)
+        meta = store.load_meta()
+        agents = meta.get("agents", [])
+
         memory = SessionMemory(str(path))
+
+        # Build/update the FTS index from session events before searching.
+        # This is idempotent — already-indexed events are skipped.
+        for agent_name in agents:
+            events = store.get_events(agent_name)
+            if events:
+                memory.index_events(agent_name, events)
+
+        store.close(update_status=False)
+
         results = memory.search(query=q, mode=mode, k=k, agent=agent)
     except Exception as e:
         raise HTTPException(500, f"Memory search failed: {e}")
